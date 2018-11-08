@@ -1,0 +1,77 @@
+#include <pthread.h>
+#include <sched.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include "matrix_data.h"
+
+double A[dimM][dimN];
+double B[dimN][dimM];
+double B2[dimN][dimM];
+double C[dimM][dimM];
+
+double* currentB;
+
+
+double fRand(double fMin, double fMax)
+{
+    double f = (double)rand() / RAND_MAX;
+    return fMin + f * (fMax - fMin);
+}
+
+void createA() {
+    int i;
+    int j;
+    for ( i = 0; i < dimM; i++ ) {
+        for ( j = 0; j < dimN; j++ ) {
+            A[i][j] = fRand(lb,ub);
+        }
+    }
+}
+
+void createB() {
+    int i;
+    int j;
+    for ( j = 0; j < dimM; j++ ) {
+        for ( i = 0; i < dimN; i++ ) {
+            *(currentB + i * dimN + j) = fRand(lb,ub);
+        }
+    }
+}
+
+void swap() {
+    printf("%p\n", &B);
+    printf("%p\n", currentB);
+    printf("\n\n");
+
+    if(currentB == &B) {
+        currentB = B2;
+    } else {
+        current = B;
+    }
+}
+
+void* threadK(void* args) {
+    //createA();
+    // change to i < numMultiplications 
+
+    for(int i = 0; i < 1; i++){
+        //createB();
+        swap();
+    }
+}
+
+int main(int argc, char *argv[]) {
+    pthread_t threads[k+1];
+    int ids[k+1];
+    //TODO change i < 1 to k+1
+    for(int i = 0; i < 1; i++) {
+        ids[i] = i;
+        pthread_create(&threads[i], NULL, threadK, NULL);
+    }
+
+    for(int i = 0; i < 2; i++) {
+        pthread_join(threads[i], NULL);
+    }
+
+    return 0;
+}
