@@ -20,18 +20,19 @@ int calculate[k-1];
 pthread_mutex_t mutex2 = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t cond2 = PTHREAD_COND_INITIALIZER;
 
+int workload = 0;
+
 void permitCalc() {
-	for(int i = 0; i < k; i++) {
-		calculate[i] = 1;	
-	}
+    for(int i = 0; i < k; i++) {
+	calculate[i] = 1;	
+    }
 }
 
 void initCalc() {
-	for(int i = 0; i < k; i++) {
-		calculate[i] = 0;
-	}
+    for(int i = 0; i < k; i++) {
+	calculate[i] = 0;
+    }
 }
-
 
 double fRand(double fMin, double fMax)
 {
@@ -64,7 +65,7 @@ void multiplyAB(int start, int end) {
         for(int col = 0; col < dimM; col++) {
             double aux = 0;
             for(int i = 0; i < dimN; i++) {
-//                aux += A[row][i] * *(currentB + i * dimN + col);
+                aux += A[row][i] * *(currentB + i * dimN + col);
             }
             C[row][col] = aux;
         }
@@ -117,14 +118,14 @@ void* worker(void* args) {
         //pthread_mutex_lock(&mutex2);
         pthread_mutex_lock(&mutex2);       
 	if(calculate[id] == 0){
-	    printf("%d wait for leader\t because calc is %d \n", id, calculate[id]);
+	    printf("%d wait for leader\n", id);
             pthread_cond_wait(&cond2, &mutex2);
 	} 
 	calculate[id] = 0;
         pthread_mutex_unlock(&mutex2);
         //pthread_mutex_unlock(&mutex2);
 
-        //multiplyAB(0, 1);
+        multiplyAB(0, 1);
         printf("%d going to sleep...\n", id);
         sleep(1);
         
@@ -141,6 +142,7 @@ void* worker(void* args) {
 
 int main(int argc, char *argv[]) {
     initCalc();
+    workload = 
     pthread_t threads[k+1];
     int ids[k+1];
     for(int i = 0; i < k+1; i++) {

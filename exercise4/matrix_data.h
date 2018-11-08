@@ -5,7 +5,7 @@
 
 #define  dimM      5
 #define  dimN      5
-#define     k     50
+#define     k     10
 
 #define numMultiplications 10
 
