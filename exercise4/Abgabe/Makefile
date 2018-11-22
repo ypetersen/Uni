@@ -1,19 +1,19 @@
 
 CC=gcc
-CFLAGS=-Wall -g -D__linux__ -D__x86_64__ -lpthread
+CFLAGS=-Wall -g -D__linux__ -D__x86_64__ -pthread
 LDFLAGS=
 
 HEADERS=matrix_data.h
 
-all: sequential
+all: parallel
 
 %.o: %.c $(HEADERS)
 	$(CC) -c $(CFLAGS) -o $@ $<
 
-sequential: scheduler.o sequential.o
+parallel: parallel.o
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
 
 clean:
-	rm -f *.o sequential *~
+	rm -f *.o parallel *~
 
 .PHONY: all clean

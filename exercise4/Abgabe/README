@@ -1,0 +1,14 @@
+Evaluation:
+    Execution of "sequential" took 2m50s
+
+    Execution of "parallel" with k =   1 took 3m18s
+                            with k =   2 took 1m47s
+                            with k =   3 took 1m46s
+                            with k =   4 took 1m36s
+                            with K =   8 took 1m42s
+                            with k =  10 took 1m42s
+                            with k =  50 took 1m44s
+                            with k = 500 took 1m43s
+
+    Fastest execution time when k equals number of real cpu cores.
+    

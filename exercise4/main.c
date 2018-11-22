@@ -20,17 +20,15 @@ int calculate[k-1];
 pthread_mutex_t mutex2 = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t cond2 = PTHREAD_COND_INITIALIZER;
 
-int workload = 0;
-
 void permitCalc() {
     for(int i = 0; i < k; i++) {
-	calculate[i] = 1;	
+	    calculate[i] = 1;
     }
 }
 
 void initCalc() {
     for(int i = 0; i < k; i++) {
-	calculate[i] = 0;
+	    calculate[i] = 0;
     }
 }
 
@@ -60,8 +58,11 @@ void createB() {
     }
 }
 
-void multiplyAB(int start, int end) {
-    for(int row = start; row < end; row++) {
+void multiplyAB(int id) {
+    int row = id;
+    int ci = 0;
+    while(row < dimM) {
+//        printf("thread %d calculating row %d\n",id, row);
         for(int col = 0; col < dimM; col++) {
             double aux = 0;
             for(int i = 0; i < dimN; i++) {
@@ -69,11 +70,21 @@ void multiplyAB(int start, int end) {
             }
             C[row][col] = aux;
         }
+        ci++;
+        row = id + ci * k;
+    }
+}
+
+void printC() {
+    for(int i = 0; i < dimM; i++) {
+        for(int j = 0; j < dimM; j++) {
+            printf("%e", C[i][j]);
+        }
     }
 }
 
 void swap() {
-    printf("swap-buffer\n");
+//    printf("swap-buffer\n");
     if(currentB == *B) {
         currentB = *B2;
         nextB = *B;
@@ -90,13 +101,12 @@ void* leadworker(void* args) {
     *   3. signal workerthreads to start
     */
     createA();
-    for(int i = 0; i < 4; i++) {
+    for(int i = 0; i < numMultiplications; i++) {
         createB();
-        printf("B %d created!\n", i);
-        //wait for every worker to finish before swapping B 
+        printf("%d", i);fflush(0);
+        //wait for every worker to finish before swapping B
         pthread_mutex_lock(&mutex);
         while(done < k) {
-	    printf("%d out of %d done\n", done, k);
             pthread_cond_wait(&cond, &mutex);
         }
         done = 0;
@@ -108,32 +118,29 @@ void* leadworker(void* args) {
         pthread_cond_broadcast(&cond2);
         pthread_mutex_unlock(&mutex2);
     }
-    printf("leader finished\n");
+    printf("leadworker finished\n");
     pthread_exit(NULL);
 }
 
 void* worker(void* args) {
     int id= *(int*)args;
-    for(int i = 0; i < 4; i++) {
-        //pthread_mutex_lock(&mutex2);
-        pthread_mutex_lock(&mutex2);       
-	if(calculate[id] == 0){
-	    printf("%d wait for leader\n", id);
-            pthread_cond_wait(&cond2, &mutex2);
-	} 
-	calculate[id] = 0;
-        pthread_mutex_unlock(&mutex2);
-        //pthread_mutex_unlock(&mutex2);
+    for(int i = 0; i < numMultiplications; i++) {
+        pthread_mutex_lock(&mutex2);
 
-        multiplyAB(0, 1);
-        printf("%d going to sleep...\n", id);
-        sleep(1);
-        
+        if(calculate[id] == 0){
+            pthread_cond_wait(&cond2, &mutex2);
+	    }
+	    calculate[id] = 0;
+        pthread_mutex_unlock(&mutex2);
+
+        multiplyAB(id);
+
         pthread_mutex_lock(&mutex);
         done++;
-	if(done >= k){
-        	pthread_cond_signal(&cond);	
-	}
+
+	    if(done >= k){
+        	pthread_cond_signal(&cond);
+	    }
         pthread_mutex_unlock(&mutex);
     }
     printf("%d finished\n", id);
@@ -142,7 +149,7 @@ void* worker(void* args) {
 
 int main(int argc, char *argv[]) {
     initCalc();
-    workload = 
+    //workload =
     pthread_t threads[k+1];
     int ids[k+1];
     for(int i = 0; i < k+1; i++) {
@@ -157,5 +164,6 @@ int main(int argc, char *argv[]) {
     for(int i = 0; i < k+1; i++) {
         pthread_join(threads[i], NULL);
     }
+
     return 0;
 }

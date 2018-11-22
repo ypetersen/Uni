@@ -3,9 +3,9 @@
 #ifndef MATRIX_DATA_H
 #define MATRIX_DATA_H
 
-#define  dimM      5
-#define  dimN      5
-#define     k     50
+#define  dimM   1000
+#define  dimN   2000
+#define     k      8
 
 #define numMultiplications 10
 
